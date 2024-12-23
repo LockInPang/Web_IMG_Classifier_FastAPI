@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Classification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Upload an Image for Classification</h1>
+
+    <!-- Form for uploading image -->
+    <form id="upload-form">
+        <input type="file" id="image-file" accept="image/*" required />
+        <button type="submit">Upload and Predict</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        // Handle form submission
+        document.getElementById("upload-form").addEventListener("submit", async function(event) {
+            event.preventDefault();  // Prevent form from reloading the page
+
+            const fileInput = document.getElementById("image-file");
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert("Please select an image file.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            try {
+                // Send the file to the FastAPI backend
+                const response = await fetch('http://127.0.0.1:8000/predict', {
+                    method: 'POST',
+                    mode:"cors",
+                    body: formData,
+                });
+
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    // Display the predicted label
+                    console.log(result);
+                    console.log(result.label);
+                    document.getElementById("result").innerText = `Predicted label: ${result.label}`;
+                } else {
+                    document.getElementById("result").innerText = `Error: ${result.error}`;
+                }
+            } catch (error) {
+                document.getElementById("result").innerText = `Error: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
